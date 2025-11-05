@@ -112,3 +112,9 @@ After looking more closely into the Github Issue, I realized that we actually ju
 #### Reseeding the Database
 Obviously, in a production app, we couldn't just reseed the database like this without losing data. We would need to write a migration script to fix existing records. But for this assignment, reseeding was sufficient to demonstrate the functionality.
 
+# Future Improvements
+Some future improvements I would make if I had more time:
+1. Add pagination to the advocate list to improve performance with large datasets.
+2. Add inequality filtering for yearsOfExperience (e.g., "> 5").
+3. Change the "reset search" button to an "X" icon inside the search input for better UX.
+4. Move around the "search" label, "searching for" text, and input field to improve layout and usability.
