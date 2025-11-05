@@ -10,3 +10,4 @@
 4. Since yearsOfExperience is a number, I ensured that the search term comparison converts it to a string for accurate filtering.
 5. Since specialties is an array, I modified the filtering logic to check if any specialty includes the search term, allowing for more flexible searches.
 6. I added a type to the onChange event handler for the search input to ensure proper typing in TypeScript.
+7. Fixed hydration error by wrapping <th> elements in a <tr> within the <thead>.
