@@ -92,7 +92,7 @@ Drizzle ORM has a known bug with postgres-js where JSONB columns get double-enco
 3. Claude researched the issue and found that it was a known bug with Drizzle ORM when using the postgres-js driver.
 4. Claude suggested creating a custom JSONB type that bypasses Drizzle's default stringification behavior.
 
-#### The Solution
+#### The First Solution
 Created a custom JSONB type that passes values directly to the
 postgres-js driver without stringifying them:
 
@@ -103,7 +103,12 @@ File: `src/db/schema.ts`
 - Updated the specialties field to use customJsonb<string[]>
 instead of jsonb()
 
-#### Result
+##### The Result
 After implementing the custom JSONB type and reseeding the database, the specialties field was stored correctly as a proper JSONB array. The server-side search for specialties worked as intended, allowing users to search advocates by their specialties.
 
+#### Better Solution
+After looking more closely into the Github Issue, I realized that we actually just needed to update Drizzle ORM to 0.33.0 or later, as the bug had been fixed in that version. So I updated Drizzle ORM to the latest version and reverted the custom JSONB type back to using the built-in jsonb() helper.
+
+#### Reseeding the Database
 Obviously, in a production app, we couldn't just reseed the database like this without losing data. We would need to write a migration script to fix existing records. But for this assignment, reseeding was sufficient to demonstrate the functionality.
+
