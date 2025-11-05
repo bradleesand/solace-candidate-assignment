@@ -10,6 +10,9 @@ export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
 
+  const cellClasses = "border border-gray-300 px-4 py-2";
+  const headerCellClasses = `${cellClasses} text-left`;
+
   useEffect(() => {
     console.log("fetching advocates...");
     fetch("/api/advocates").then((response) => {
@@ -80,30 +83,30 @@ export default function Home() {
         <table className="min-w-full border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border border-gray-300 px-4 py-2 text-left">First Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Last Name</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">City</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Degree</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Specialties</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Years of Experience</th>
-              <th className="border border-gray-300 px-4 py-2 text-left">Phone Number</th>
+              <th className={headerCellClasses}>First Name</th>
+              <th className={headerCellClasses}>Last Name</th>
+              <th className={headerCellClasses}>City</th>
+              <th className={headerCellClasses}>Degree</th>
+              <th className={headerCellClasses}>Specialties</th>
+              <th className={headerCellClasses}>Years of Experience</th>
+              <th className={headerCellClasses}>Phone Number</th>
             </tr>
           </thead>
           <tbody>
             {filteredAdvocates.map((advocate) => {
               return (
                 <tr key={advocate.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-2">{advocate.firstName}</td>
-                  <td className="border border-gray-300 px-4 py-2">{advocate.lastName}</td>
-                  <td className="border border-gray-300 px-4 py-2">{advocate.city}</td>
-                  <td className="border border-gray-300 px-4 py-2">{advocate.degree}</td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className={cellClasses}>{advocate.firstName}</td>
+                  <td className={cellClasses}>{advocate.lastName}</td>
+                  <td className={cellClasses}>{advocate.city}</td>
+                  <td className={cellClasses}>{advocate.degree}</td>
+                  <td className={cellClasses}>
                     {advocate.specialties.map((s, i) => (
                       <div key={i} className="text-sm">{s}</div>
                     ))}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">{advocate.yearsOfExperience}</td>
-                  <td className="border border-gray-300 px-4 py-2">{advocate.phoneNumber}</td>
+                  <td className={cellClasses}>{advocate.yearsOfExperience}</td>
+                  <td className={cellClasses}>{advocate.phoneNumber}</td>
                 </tr>
               );
             })}
