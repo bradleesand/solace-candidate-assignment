@@ -14,3 +14,6 @@
 
 # Styling
 1. I told Claude to "Use tailwind classes to add styling to page.tsx" and it added several tailwind classes to improve the appearance of the page. I may go through and tweak these but they look pretty good for now and design is not my forte. If given any kind of reference like a Figma design or even just looking at the existing style already in place in the app, I could easily nail the desired look, but I'm not good at coming up with good design from scratch.
+
+# Seed route
+My IDE was complaining about "insert" not existing on the db object because the mock that is returned if DATABASE_URL is not set does not have an insert method. Since this kind of mocking wouldn't be used in a production-ready app, I decided to just remove that mock and instead throw an error if DATABASE_URL is not set. This way the db object is always a proper Drizzle ORM database instance and has all the expected methods.
