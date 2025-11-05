@@ -114,7 +114,19 @@ Obviously, in a production app, we couldn't just reseed the database like this w
 
 # Future Improvements
 Some future improvements I would make if I had more time:
-1. Add pagination to the advocate list to improve performance with large datasets.
+1. Add pagination to the advocate list to improve performance with large datasets. (I really wanted to do this if I hadn't gotten bogged down by the "specialties" jsonb serialization issue because this would actually be necessary alongside the server-side search in order to be performant as the advocate tables grows.)
 2. Add inequality filtering for yearsOfExperience (e.g., "> 5").
 3. Change the "reset search" button to an "X" icon inside the search input for better UX.
 4. Move around the "search" label, "searching for" text, and input field to improve layout and usability.
+
+## Pagination Implementation Plan
+To implement pagination, I would take the following steps:
+1. **Backend Changes:**
+   - Update the API endpoint that fetches advocates to accept pagination parameters `offset` and `limit`. (I personally prefer offset-based pagination for simplicity.)
+   - Modify the database query to use these parameters to fetch only the relevant subset of advocates.
+   - Return the total count of advocates in the response so the frontend can calculate the number of pages.
+2. **Frontend Changes:**
+   - Add state variables to track the current page and total pages.
+   - Create pagination controls (e.g., "Previous" and "Next" buttons) to navigate between pages.
+   - Update the fetch logic to include the current page's offset and limit when requesting advocates from the backend.
+   - Display the current page number and total pages to the user.
