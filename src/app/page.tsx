@@ -1,56 +1,58 @@
 "use client";
 
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { InferSelectModel } from "drizzle-orm";
+import { useDebounce } from "use-debounce";
 import { advocates } from "../db/schema";
 
 type Advocate = InferSelectModel<typeof advocates>;
 
+const cellClasses = "border border-gray-300 px-4 py-2";
+const headerCellClasses = `${cellClasses} text-left`;
+
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
-
-  const cellClasses = "border border-gray-300 px-4 py-2";
-  const headerCellClasses = `${cellClasses} text-left`;
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
-      });
-    });
-  }, []);
+    const url = debouncedSearchTerm
+      ? `/api/advocates?search=${encodeURIComponent(debouncedSearchTerm)}`
+      : "/api/advocates";
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
-
-    const searchTermElement = document.getElementById("search-term");
-    if (searchTermElement) {
-      searchTermElement.innerHTML = searchTerm;
-    } else {
-      console.warn("search-term element not found");
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
 
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.some(s => s.includes(searchTerm)) ||
-        advocate.yearsOfExperience.toString() === searchTerm
-      );
-    });
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
-    setFilteredAdvocates(filteredAdvocates);
+    fetch(url, { signal: abortController.signal })
+      .then((response) => response.json())
+      .then((jsonResponse) => {
+        setAdvocates(jsonResponse.data);
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') {
+          console.log('Fetch aborted');
+        } else {
+          console.error('Fetch error:', error);
+        }
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [debouncedSearchTerm]);
+
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
   const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
+    setSearchTerm("");
   };
 
   return (
@@ -61,11 +63,12 @@ export default function Home() {
         <div>
           <label className="block text-sm font-medium mb-2">Search</label>
           <p className="text-sm text-gray-600 mb-2">
-            Searching for: <span id="search-term" className="font-semibold"></span>
+            Searching for: <span id="search-term" className="font-semibold">{debouncedSearchTerm}</span>
           </p>
           <div className="flex gap-2">
             <input
               className="border border-gray-300 rounded px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
               onChange={onChange}
               placeholder="Search advocates..."
             />
@@ -93,7 +96,7 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            {filteredAdvocates.map((advocate) => {
+            {advocates.map((advocate) => {
               return (
                 <tr key={advocate.id} className="hover:bg-gray-50">
                   <td className={cellClasses}>{advocate.firstName}</td>
