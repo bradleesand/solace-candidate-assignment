@@ -85,6 +85,13 @@ export default function Home() {
   const hasNextPage = currentPage < totalPages - 1;
   const hasPrevPage = currentPage > 0;
 
+  const getPaginationButtonClasses = (enabled: boolean) =>
+    `px-4 py-2 rounded font-medium transition-colors ${
+      enabled
+        ? "bg-blue-500 hover:bg-blue-600 text-white"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }`;
+
   return (
     <main className="p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">Solace Advocates</h1>
@@ -156,11 +163,7 @@ export default function Home() {
           <button
             onClick={handlePrevPage}
             disabled={!hasPrevPage}
-            className={`px-4 py-2 rounded font-medium transition-colors ${
-              hasPrevPage
-                ? "bg-blue-500 hover:bg-blue-600 text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+            className={getPaginationButtonClasses(hasPrevPage)}
           >
             Previous
           </button>
@@ -170,11 +173,7 @@ export default function Home() {
           <button
             onClick={handleNextPage}
             disabled={!hasNextPage}
-            className={`px-4 py-2 rounded font-medium transition-colors ${
-              hasNextPage
-                ? "bg-blue-500 hover:bg-blue-600 text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+            className={getPaginationButtonClasses(hasNextPage)}
           >
             Next
           </button>
