@@ -9,18 +9,34 @@ type Advocate = InferSelectModel<typeof advocates>;
 
 const cellClasses = "border border-gray-300 px-4 py-2";
 const headerCellClasses = `${cellClasses} text-left`;
+const PAGE_SIZE = 25;
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [total, setTotal] = useState(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
     console.log("fetching advocates...");
-    const url = debouncedSearchTerm
-      ? `/api/advocates?search=${encodeURIComponent(debouncedSearchTerm)}`
-      : "/api/advocates";
+    const offset = currentPage * PAGE_SIZE;
+    const params = new URLSearchParams({
+      limit: PAGE_SIZE.toString(),
+      offset: offset.toString(),
+    });
+
+    if (debouncedSearchTerm) {
+      params.set("search", debouncedSearchTerm);
+    }
+
+    const url = `/api/advocates?${params.toString()}`;
 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -33,6 +49,7 @@ export default function Home() {
       .then((response) => response.json())
       .then((jsonResponse) => {
         setAdvocates(jsonResponse.data);
+        setTotal(jsonResponse.total);
       })
       .catch((error) => {
         if (error.name === 'AbortError') {
@@ -45,7 +62,7 @@ export default function Home() {
     return () => {
       abortController.abort();
     };
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, currentPage]);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -54,6 +71,26 @@ export default function Home() {
   const onClick = () => {
     setSearchTerm("");
   };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    const maxPage = Math.ceil(total / PAGE_SIZE) - 1;
+    setCurrentPage((prev) => Math.min(maxPage, prev + 1));
+  };
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const hasNextPage = currentPage < totalPages - 1;
+  const hasPrevPage = currentPage > 0;
+
+  const getPaginationButtonClasses = (enabled: boolean) =>
+    `px-4 py-2 rounded font-medium transition-colors ${
+      enabled
+        ? "bg-blue-500 hover:bg-blue-600 text-white"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }`;
 
   return (
     <main className="p-6 max-w-7xl mx-auto">
@@ -115,6 +152,32 @@ export default function Home() {
             })}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-6 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          Showing {total === 0 ? 0 : currentPage * PAGE_SIZE + 1} to{" "}
+          {Math.min((currentPage + 1) * PAGE_SIZE, total)} of {total} results
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handlePrevPage}
+            disabled={!hasPrevPage}
+            className={getPaginationButtonClasses(hasPrevPage)}
+          >
+            Previous
+          </button>
+          <div className="flex items-center px-4 py-2 text-sm text-gray-700">
+            Page {currentPage + 1} of {totalPages || 1}
+          </div>
+          <button
+            onClick={handleNextPage}
+            disabled={!hasNextPage}
+            className={getPaginationButtonClasses(hasNextPage)}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </main>
   );
